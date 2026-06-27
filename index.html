@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — CraftedRealms</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="admin-login-wrap">
+    <div class="admin-login-box">
+      <div class="admin-login-icon">🛡️</div>
+      <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 6px;">Admin Panel</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 28px;">CraftedRealms Store Management</p>
+
+      <div id="loginAlert"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="adminPass">Password</label>
+        <input type="password" id="adminPass" class="form-input" placeholder="Enter admin password"
+          onkeydown="if(event.key==='Enter') attemptLogin()" autofocus />
+      </div>
+
+      <button class="btn btn-primary btn-full" onclick="attemptLogin()" id="loginBtn">
+        🔓 Login to Admin Panel
+      </button>
+
+      <div style="margin-top: 16px; font-size: 12px; color: var(--text-muted);">
+        Default password: <code style="background: var(--bg-elevated); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono);">password</code><br/>
+        <span style="color: var(--accent-red);">⚠ Change this in admin-auth.js before hosting!</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL (hidden until logged in) -->
+<div id="adminPanel" class="hidden">
+
+  <!-- TOP BAR -->
+  <nav>
+    <div class="nav-inner">
+      <a href="../index.html" class="nav-logo">
+        <div class="nav-logo-icon">🛡</div>
+        <div class="nav-logo-text">Admin <span>Panel</span></div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="../index.html">← View Store</a></li>
+        <li><a href="#" onclick="doLogout(); return false;" style="color: var(--accent-red);">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="admin-layout">
+    <!-- SIDEBAR -->
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-title">Management</div>
+      <div class="admin-nav-item active" data-section="dashboard" onclick="switchSection('dashboard')">
+        📊 Dashboard
+      </div>
+      <div class="admin-nav-item" data-section="orders" onclick="switchSection('orders')">
+        📦 Orders
+      </div>
+      <div class="admin-nav-item" data-section="ranks" onclick="switchSection('ranks')">
+        ⚔️ Ranks
+      </div>
+      <div class="admin-nav-item" data-section="kits" onclick="switchSection('kits')">
+        🎒 Kits
+      </div>
+      <div class="admin-nav-item" data-section="settings" onclick="switchSection('settings')">
+        ⚙️ Settings
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="admin-content">
+
+      <!-- DASHBOARD -->
+      <div class="admin-section active" id="section-dashboard">
+        <div class="admin-header">
+          <h2>📊 Dashboard</h2>
+          <span style="color: var(--text-muted); font-size: 13px;" id="dashTimestamp"></span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px;">
+          <div class="stat-card">
+            <div class="stat-card-icon">📦</div>
+            <div class="stat-card-num" id="dashTotalOrders">0</div>
+            <div class="stat-card-label">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">⏳</div>
+            <div class="stat-card-num" id="dashPendingOrders">0</div>
+            <div class="stat-card-label">Pending</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">✅</div>
+            <div class="stat-card-num" id="dashCompletedOrders">0</div>
+            <div class="stat-card-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-icon">💰</div>
+            <div class="stat-card-num" id="dashRevenue">₹0</div>
+            <div class="stat-card-label">Total Revenue</div>
+          </div>
+        </div>
+
+        <div class="admin-header" style="margin-top: 32px;">
+          <h3 style="font-size: 16px; font-weight: 600;">Recent Orders</h3>
+        </div>
+        <div id="recentOrdersTable"></div>
+      </div>
+
+      <!-- ORDERS -->
+      <div class="admin-section" id="section-orders">
+        <div class="admin-header">
+          <h2>📦 All Orders</h2>
+          <div style="display: flex; gap: 8px;">
+            <select id="orderFilter" class="form-input" style="width: auto; padding: 8px 12px; font-size: 13px;" onchange="renderOrdersTable()">
+              <option value="all">All Orders</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="exportOrders()">📥 Export CSV</button>
+          </div>
+        </div>
+        <div id="ordersTableWrap"></div>
+      </div>
+
+      <!-- RANKS -->
+      <div class="admin-section" id="section-ranks">
+        <div class="admin-header">
+          <h2>⚔️ Ranks</h2>
+          <button class="btn btn-primary btn-sm" onclick="openAddRankModal()">+ Add Rank</button>
+        </div>
+        <div id="ranksTableWrap"></div>
+      </div>
+
+      <!-- KITS -->
+      <div class="admin-section" id="section-kits">
+        <div class="admin-header">
+          <h2>🎒 Kits</h2>
+          <button class="btn btn-primary btn-sm" onclick="openAddKitModal()">+ Add Kit</button>
+        </div>
+        <div id="kitsTableWrap"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="admin-section" id="section-settings">
+        <div class="admin-header">
+          <h2>⚙️ Settings</h2>
+        </div>
+
+        <div style="max-width: 600px;">
+          <div class="alert alert-info">ℹ️ Settings are saved to your browser. For permanent changes, edit <code>js/store-data.js</code>.</div>
+
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px; margin-top: 16px;">Store Configuration</h3>
+
+          <div class="form-group">
+            <label class="form-label">Server Name</label>
+            <input type="text" class="form-input" id="setServerName" placeholder="CraftedRealms" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Server IP</label>
+            <input type="text" class="form-input" id="setServerIp" placeholder="play.craftedrealms.net" />
+          </div>
+
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px; margin-top: 24px;">UPI Payment Settings</h3>
+
+          <div class="form-group">
+            <label class="form-label">Your UPI ID</label>
+            <input type="text" class="form-input" id="setUpiId" placeholder="yourname@upi" />
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">e.g. yourname@paytm, yourname@ybl, yourphone@upi</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Name (shown to buyer)</label>
+            <input type="text" class="form-input" id="setUpiName" placeholder="Your Full Name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Announcement Banner Text</label>
+            <input type="text" class="form-input" id="setBannerText" placeholder="🎮 Welcome to our store!" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discord Link</label>
+            <input type="text" class="form-input" id="setDiscordLink" placeholder="https://discord.gg/yourserver" />
+          </div>
+
+          <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+          <button class="btn btn-ghost" onclick="loadSettings()" style="margin-left: 8px;">↺ Reset</button>
+
+          <div style="border-top: 1px solid var(--border-dim); margin: 32px 0;"></div>
+
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 16px; color: var(--accent-red);">Danger Zone</h3>
+          <button class="btn btn-danger btn-sm" onclick="clearAllOrders()">🗑 Clear All Orders</button>
+          <button class="btn btn-danger btn-sm" onclick="resetToDefaults()" style="margin-left: 8px;">↺ Reset Ranks & Kits to Default</button>
+        </div>
+      </div>
+
+    </div><!-- end admin-content -->
+  </div><!-- end admin-layout -->
+</div><!-- end adminPanel -->
+
+<!-- RANK MODAL -->
+<div class="modal-overlay" id="rankModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="rankModalTitle">Add New Rank</h3>
+      <button class="cart-close" onclick="closeModal('rankModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="rankEditId" />
+      <div class="form-group">
+        <label class="form-label">Rank Name *</label>
+        <input type="text" class="form-input" id="rankName" placeholder="e.g. Diamond" />
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" class="form-input" id="rankPrice" placeholder="499" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Badge Emoji</label>
+          <input type="text" class="form-input" id="rankBadge" placeholder="💎" />
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Main Color (hex)</label>
+          <input type="color" class="form-input" id="rankColor" value="#00ffff" style="padding: 6px; height: 44px;" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Glow Color (hex)</label>
+          <input type="color" class="form-input" id="rankGlow" value="#7ffeff" style="padding: 6px; height: 44px;" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="rankPopular" style="width: 16px; height: 16px;" />
+          Mark as "Most Popular"
+        </label>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Perks / Features *</label>
+        <textarea class="form-input" id="rankPerks" rows="6" placeholder="One perk per line:&#10;Gold rank prefix [Gold]&#10;Access to /kit gold&#10;10 Home locations"></textarea>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Enter one perk per line</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('rankModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRank()">💾 Save Rank</button>
+    </div>
+  </div>
+</div>
+
+<!-- KIT MODAL -->
+<div class="modal-overlay" id="kitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="kitModalTitle">Add New Kit</h3>
+      <button class="cart-close" onclick="closeModal('kitModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="kitEditId" />
+      <div class="form-group">
+        <label class="form-label">Kit Name *</label>
+        <input type="text" class="form-input" id="kitName" placeholder="e.g. Warrior Kit" />
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Price (₹) *</label>
+          <input type="number" class="form-input" id="kitPrice" placeholder="199" min="1" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Badge Emoji</label>
+          <input type="text" class="form-input" id="kitBadge" placeholder="⚔️" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cooldown</label>
+          <select class="form-input" id="kitCooldown">
+            <option>One-time</option>
+            <option>Daily</option>
+            <option>Weekly</option>
+            <option>Monthly</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Main Color (hex)</label>
+          <input type="color" class="form-input" id="kitColor" value="#ff6b35" style="padding: 6px; height: 44px;" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Glow Color (hex)</label>
+          <input type="color" class="form-input" id="kitGlow" value="#ff9d72" style="padding: 6px; height: 44px;" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Items in Kit *</label>
+        <textarea class="form-input" id="kitItems" rows="6" placeholder="One item per line:&#10;Diamond Sword (Sharpness III)&#10;64x Steak&#10;Full Iron Armor (Protection II)"></textarea>
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Enter one item per line</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('kitModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveKit()">💾 Save Kit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER DETAIL MODAL -->
+<div class="modal-overlay" id="orderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Order Details</h3>
+      <button class="cart-close" onclick="closeModal('orderModal')">✕</button>
+    </div>
+    <div class="modal-body" id="orderModalBody"></div>
+    <div class="modal-footer" id="orderModalFooter"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="../js/store-data.js"></script>
+<script src="../js/admin-auth.js"></script>
+<script src="../js/store.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

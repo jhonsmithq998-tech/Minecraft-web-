@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — CraftedRealms Store</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⛏️</text></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">⛏</div>
+      <div class="nav-logo-text">Crafted<span>Realms</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">← Back to Store</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- PAYMENT PAGE -->
+<div class="payment-container" id="paymentPage">
+  <div style="text-align:center; margin-bottom: 24px;">
+    <div class="section-tag">// SECURE CHECKOUT</div>
+    <h1 style="font-size: 30px; font-weight: 800; margin-top: 8px;">Complete Your Order</h1>
+  </div>
+
+  <div class="payment-box">
+    <div class="payment-header">
+      <div style="font-size: 32px; margin-bottom: 8px;">🔐</div>
+      <h2>UPI Payment</h2>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">Powered by India's Unified Payments Interface</p>
+    </div>
+
+    <div class="payment-body">
+      <!-- ORDER SUMMARY -->
+      <div class="order-summary" id="orderSummary">
+        <div class="order-summary-title">Order Summary</div>
+        <div id="orderItems"></div>
+        <div class="order-total-row">
+          <span>Total Amount</span>
+          <span class="order-total-amount" id="orderTotal">₹0</span>
+        </div>
+      </div>
+
+      <!-- PLAYER USERNAME -->
+      <div class="form-group">
+        <label class="form-label" for="mcUsername">Minecraft Username *</label>
+        <input type="text" id="mcUsername" class="form-input" placeholder="Enter your Minecraft username" required />
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">This is where your rank/kit will be delivered</div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address *</label>
+        <input type="email" id="email" class="form-input" placeholder="your@email.com" required />
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">We'll send your order confirmation here</div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div style="border-top: 1px solid var(--border-dim); margin: 24px 0;"></div>
+
+      <!-- UPI PAYMENT BOX -->
+      <div class="upi-box">
+        <div class="upi-icon">💸</div>
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px; font-family: var(--font-mono); letter-spacing: 1px;">SEND EXACTLY</div>
+        <div class="upi-amount" id="upiAmount">₹0</div>
+        <div style="font-size: 13px; color: var(--text-muted);">to this UPI ID:</div>
+        <div class="upi-id" id="upiIdDisplay" onclick="copyUpiId()" title="Click to copy">
+          📋 <span id="upiIdText"></span>
+        </div>
+        <div class="upi-instruction">Pay to: <strong id="upiName"></strong></div>
+      </div>
+
+      <!-- PAYMENT APPS -->
+      <div style="text-align: center; margin-bottom: 16px;">
+        <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Open any of these apps to pay:</div>
+        <div class="payment-apps">
+          <span class="payment-app-badge">📱 PhonePe</span>
+          <span class="payment-app-badge">G GPay</span>
+          <span class="payment-app-badge">🪙 Paytm</span>
+          <span class="payment-app-badge">🏦 BHIM</span>
+        </div>
+      </div>
+
+      <!-- STEPS -->
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;">Payment Steps</div>
+      <ol class="steps-list">
+        <li>Open your preferred UPI app (PhonePe, GPay, Paytm, etc.)</li>
+        <li>Send <strong id="stepsAmount" style="color: var(--accent-green)">₹0</strong> to UPI ID: <strong id="stepsUpiId" style="color: var(--accent-cyan); font-family: var(--font-mono);"></strong></li>
+        <li>Add note: Your Minecraft username in the payment description</li>
+        <li>Complete the payment and note your transaction ID</li>
+        <li>Click "Confirm Payment" below and enter your transaction ID</li>
+      </ol>
+
+      <!-- TRANSACTION ID -->
+      <div class="form-group">
+        <label class="form-label" for="txnId">UPI Transaction ID *</label>
+        <input type="text" id="txnId" class="form-input" placeholder="e.g. T2024010112345678901234" required />
+        <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Find this in your UPI app's payment history</div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button class="btn btn-primary btn-full btn-lg" onclick="submitOrder()" id="submitBtn">
+        ✅ Confirm Payment & Place Order
+      </button>
+
+      <div style="text-align: center; margin-top: 16px;">
+        <div style="font-size: 12px; color: var(--text-muted);">
+          🔒 Safe & Secure • UPI Verified • Delivery within 30 minutes
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+    Issues? Join our <a href="#" style="color: var(--accent-cyan);">Discord</a> for instant support.
+  </div>
+</div>
+
+<!-- SUCCESS PAGE (hidden initially) -->
+<div class="success-container hidden" id="successPage">
+  <div class="success-icon">✅</div>
+  <div class="section-tag" style="margin-bottom: 12px;">// ORDER PLACED</div>
+  <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 12px;">Payment Submitted!</h2>
+  <p style="color: var(--text-secondary); font-size: 16px; margin-bottom: 32px;">
+    Thank you! Your order has been received. We'll verify your payment and deliver your rank/kit within 30 minutes.
+  </p>
+
+  <div class="order-summary" style="max-width: 500px; margin: 0 auto 32px; text-align: left;">
+    <div class="order-summary-title">Your Order Details</div>
+    <div id="successOrderDetails"></div>
+  </div>
+
+  <div class="alert alert-info" style="max-width: 500px; margin: 0 auto 24px; justify-content: flex-start;">
+    <span>📢</span>
+    <span>Join our Discord server and share your order ID in #purchases channel for faster delivery!</span>
+  </div>
+
+  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+    <a href="index.html" class="btn btn-primary">🏠 Back to Store</a>
+    <a href="#" class="btn btn-outline">💬 Join Discord</a>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="js/store-data.js"></script>
+<script src="js/admin-auth.js"></script>
+<script src="js/store.js"></script>
+<script>
+  // Load checkout data
+  document.addEventListener('DOMContentLoaded', () => {
+    const checkoutCart = JSON.parse(localStorage.getItem('checkout_cart') || '[]');
+
+    if (checkoutCart.length === 0) {
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const total = checkoutCart.reduce((s, i) => s + i.price, 0);
+
+    // Fill order summary
+    document.getElementById('orderItems').innerHTML = checkoutCart.map(item => `
+      <div class="order-item-row">
+        <span>${item.icon} ${item.name}</span>
+        <span style="color: var(--accent-green); font-family: var(--font-mono);">₹${item.price}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('orderTotal').textContent = `₹${total}`;
+    document.getElementById('upiAmount').textContent = `₹${total}`;
+    document.getElementById('stepsAmount').textContent = `₹${total}`;
+
+    // UPI details from config
+    document.getElementById('upiIdText').textContent = STORE_CONFIG.upiId;
+    document.getElementById('upiName').textContent = STORE_CONFIG.upiName;
+    document.getElementById('stepsUpiId').textContent = STORE_CONFIG.upiId;
+  });
+
+  function copyUpiId() {
+    navigator.clipboard.writeText(STORE_CONFIG.upiId).then(() => {
+      showToast('UPI ID copied!', 'success');
+    });
+  }
+
+  function submitOrder() {
+    const username = document.getElementById('mcUsername').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const txnId = document.getElementById('txnId').value.trim();
+
+    if (!username) { showToast('Enter your Minecraft username', 'error'); return; }
+    if (!email || !email.includes('@')) { showToast('Enter a valid email address', 'error'); return; }
+    if (!txnId) { showToast('Enter your UPI transaction ID', 'error'); return; }
+    if (txnId.length < 8) { showToast('Transaction ID looks too short', 'error'); return; }
+
+    const checkoutCart = JSON.parse(localStorage.getItem('checkout_cart') || '[]');
+    const total = checkoutCart.reduce((s, i) => s + i.price, 0);
+
+    const orderId = 'CR' + Date.now().toString(36).toUpperCase();
+
+    const order = {
+      orderId,
+      username,
+      email,
+      txnId,
+      items: checkoutCart,
+      total,
+      status: 'pending',
+      timestamp: new Date().toISOString()
+    };
+
+    saveOrder(order);
+    localStorage.removeItem('checkout_cart');
+    localStorage.removeItem('cart');
+
+    // Show success
+    document.getElementById('paymentPage').classList.add('hidden');
+    document.getElementById('successPage').classList.remove('hidden');
+
+    document.getElementById('successOrderDetails').innerHTML = `
+      <div class="order-item-row">
+        <span style="color: var(--text-muted);">Order ID</span>
+        <span style="font-family: var(--font-mono); color: var(--accent-green);">${orderId}</span>
+      </div>
+      <div class="order-item-row">
+        <span style="color: var(--text-muted);">Minecraft Username</span>
+        <span>${username}</span>
+      </div>
+      <div class="order-item-row">
+        <span style="color: var(--text-muted);">Transaction ID</span>
+        <span style="font-family: var(--font-mono); font-size: 13px;">${txnId}</span>
+      </div>
+      <div class="order-item-row">
+        <span style="color: var(--text-muted);">Items</span>
+        <span>${checkoutCart.map(i => i.icon + ' ' + i.name).join(', ')}</span>
+      </div>
+      <div class="order-total-row">
+        <span>Total Paid</span>
+        <span class="order-total-amount">₹${total}</span>
+      </div>
+    `;
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
